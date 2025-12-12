@@ -9,7 +9,9 @@ The Reminder Manager is a web application that enables users to create, manage, 
 - **Reminder Manager**: The web application system that manages user reminders
 - **User**: An individual who interacts with the Reminder Manager to create and manage reminders
 - **Reminder**: A scheduled notification for a specific financial obligation or subscription
-- **Recurring Reminder**: A reminder that repeats at regular intervals (monthly, quarterly, annually)
+- **Recurring Reminder**: A reminder that repeats at regular intervals (monthly, quarterly, semi-annually, annually, or custom intervals)
+- **Custom Recurrence**: A user-defined recurrence pattern that repeats every specified number of days
+- **Currency**: The monetary unit for the reminder amount (USD, EUR, or INR)
 - **Due Date**: The date when a payment or action is required
 - **Notification**: An alert displayed to the User about an upcoming or overdue reminder
 - **Reminder Category**: A classification type for reminders (subscription, tax, insurance, utility, other)
@@ -17,6 +19,8 @@ The Reminder Manager is a web application that enables users to create, manage, 
 - **Notification Preferences**: User-configurable settings that control when and how notifications are delivered
 - **Google Calendar Integration**: A feature that allows users to add reminders to their Google Calendar through generated calendar URLs
 - **Calendar URL**: A specially formatted web link that opens Google Calendar with pre-filled event details
+- **Dark Mode**: A visual theme that uses dark colors for the interface to reduce eye strain in low-light environments
+- **Theme**: The visual appearance of the application (light or dark mode)
 
 ## Requirements
 
@@ -26,11 +30,12 @@ The Reminder Manager is a web application that enables users to create, manage, 
 
 #### Acceptance Criteria
 
-1. WHEN a user provides a reminder name, amount, due date, and category, THEN the Reminder Manager SHALL create a new reminder with the specified details
-2. WHEN a user selects a recurrence pattern (monthly, quarterly, annually, or one-time), THEN the Reminder Manager SHALL configure the reminder to repeat according to the selected pattern
-3. WHEN a user submits a reminder with missing required fields, THEN the Reminder Manager SHALL prevent creation and display validation messages for each missing field
-4. WHEN a reminder is created, THEN the Reminder Manager SHALL persist the reminder data to storage immediately
-5. WHEN a user provides optional notes for a reminder, THEN the Reminder Manager SHALL store the notes with the reminder
+1. WHEN a user provides a reminder name, amount, currency, due date, and category, THEN the Reminder Manager SHALL create a new reminder with the specified details
+2. WHEN a user selects a recurrence pattern (monthly, quarterly, semi-annually, annually, one-time, or custom), THEN the Reminder Manager SHALL configure the reminder to repeat according to the selected pattern
+3. WHEN a user selects custom recurrence and specifies an interval in days, THEN the Reminder Manager SHALL configure the reminder to repeat every specified number of days
+4. WHEN a user submits a reminder with missing required fields, THEN the Reminder Manager SHALL prevent creation and display validation messages for each missing field
+5. WHEN a reminder is created, THEN the Reminder Manager SHALL persist the reminder data to storage immediately
+6. WHEN a user provides optional notes for a reminder, THEN the Reminder Manager SHALL store the notes with the reminder
 
 ### Requirement 2
 
@@ -133,3 +138,15 @@ The Reminder Manager is a web application that enables users to create, manage, 
 3. WHEN the Google Calendar URL is generated, THEN the Reminder Manager SHALL open the URL in a new tab or window to allow the user to save the event to their calendar
 4. WHEN a reminder has recurrence, THEN the Reminder Manager SHALL include the appropriate recurrence pattern in the Google Calendar URL
 5. WHEN a user prefers calendar integration, THEN the Reminder Manager SHALL provide a setting to automatically generate calendar links for all new reminders
+
+### Requirement 11
+
+**User Story:** As a user, I want to toggle between light and dark mode, so that I can use the application comfortably in different lighting conditions.
+
+#### Acceptance Criteria
+
+1. WHEN a user first accesses the application, THEN the Reminder Manager SHALL detect the system theme preference and apply the corresponding theme
+2. WHEN a user clicks the theme toggle button, THEN the Reminder Manager SHALL switch between light and dark mode
+3. WHEN a user changes the theme, THEN the Reminder Manager SHALL persist the theme preference to storage
+4. WHEN a user returns to the application, THEN the Reminder Manager SHALL apply the previously selected theme preference
+5. WHEN the theme changes, THEN the Reminder Manager SHALL update all visual elements to match the selected theme without requiring page refresh

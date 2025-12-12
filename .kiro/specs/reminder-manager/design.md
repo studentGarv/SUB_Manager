@@ -21,9 +21,9 @@ The application is a Single Page Application (SPA) that runs entirely in the bro
 
 **ReminderForm Component**
 - Purpose: Create and edit reminders
-- Inputs: Reminder data (name, amount, due date, category, recurrence, notes)
+- Inputs: Reminder data (name, amount, currency, due date, category, recurrence, custom interval, notes)
 - Outputs: Validated reminder object
-- Responsibilities: Form validation, user input handling, date selection
+- Responsibilities: Form validation, user input handling, date selection, currency selection, custom recurrence interval input with conditional visibility
 
 **ReminderList Component**
 - Purpose: Display all reminders in a sortable list
@@ -42,6 +42,12 @@ The application is a Single Page Application (SPA) that runs entirely in the bro
 - Inputs: User search text, selected category
 - Outputs: Filter criteria object
 - Responsibilities: Search input handling, category selection, filter state management
+
+**ThemeManager Utility**
+- Purpose: Manage application theme (light/dark mode)
+- Inputs: User theme preference, system theme preference
+- Outputs: Theme changes applied to DOM
+- Responsibilities: Detect system theme using prefers-color-scheme, toggle theme on button click, persist theme preference to localStorage, apply theme via data-theme attribute, update theme icon
 
 ### Business Logic Modules
 
@@ -86,6 +92,18 @@ interface StorageService {
   getAllReminders(): Reminder[]
   updateReminder(id: string, reminder: Reminder): void
   deleteReminder(id: string): void
+  // Theme preference is stored directly via localStorage in ThemeManager
+}
+```
+
+**ThemeManager**
+```typescript
+class ThemeManager {
+  private static STORAGE_KEY = 'reminder-manager-theme'
+  constructor() // Initializes theme from storage or system preference
+  private loadTheme(): void
+  private toggleTheme(): void
+  private applyTheme(theme: string): void
 }
 ```
 
@@ -97,9 +115,11 @@ interface Reminder {
   id: string                    // Unique identifier (UUID)
   name: string                  // Reminder name/description
   amount: number                // Payment amount
+  currency: Currency            // Currency for the amount
   dueDate: Date                 // Next due date
   category: ReminderCategory    // Classification
   recurrence: RecurrencePattern // Repeat pattern
+  customRecurrenceDays?: number // Number of days for custom recurrence (only when recurrence is 'custom')
   notes?: string                // Optional user notes
   status: ReminderStatus        // Current status
   completionHistory: CompletionRecord[]  // Past completions
@@ -109,7 +129,9 @@ interface Reminder {
 
 type ReminderCategory = 'subscription' | 'tax' | 'insurance' | 'utility' | 'other'
 
-type RecurrencePattern = 'one-time' | 'monthly' | 'quarterly' | 'annually'
+type RecurrencePattern = 'one-time' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually' | 'custom'
+
+type Currency = 'USD' | 'EUR' | 'INR'
 
 type ReminderStatus = 'active' | 'completed' | 'overdue'
 
@@ -121,9 +143,11 @@ interface CompletionRecord {
 interface ReminderInput {
   name: string
   amount: number
+  currency: Currency
   dueDate: string
   category: ReminderCategory
   recurrence: RecurrencePattern
+  customRecurrenceDays?: number
   notes?: string
 }
 
@@ -145,16 +169,16 @@ interface ValidationResult {
 *A property is a characteristic or behavior that should hold true across all valid executions of a system—essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
 
 ### Property 1: Reminder creation and persistence round-trip
-*For any* valid reminder input data (name, amount, due date, category, recurrence, optional notes), creating a reminder and then retrieving it from storage should return a reminder with all the same field values.
-**Validates: Requirements 1.1, 1.4, 1.5**
+*For any* valid reminder input data (name, amount, currency, due date, category, recurrence, optional notes), creating a reminder and then retrieving it from storage should return a reminder with all the same field values.
+**Validates: Requirements 1.1, 1.5, 1.6**
 
 ### Property 2: Recurrence pattern calculation correctness
-*For any* reminder with a recurrence pattern (monthly, quarterly, annually), calculating the next occurrence from a given due date should advance the date by exactly the period specified by the pattern (1 month, 3 months, or 12 months respectively).
+*For any* reminder with a recurrence pattern (monthly, quarterly, semi-annually, annually), calculating the next occurrence from a given due date should advance the date by exactly the period specified by the pattern (1 month, 3 months, 6 months, or 12 months respectively).
 **Validates: Requirements 1.2**
 
 ### Property 3: Validation rejects incomplete input
 *For any* reminder input data with one or more required fields missing (name, amount, due date, or category), validation should fail and return error messages identifying each missing field.
-**Validates: Requirements 1.3**
+**Validates: Requirements 1.4**
 
 ### Property 4: Reminder list sorting by due date
 *For any* collection of reminders, retrieving the active reminders list should return them ordered by due date in ascending order (earliest first).
@@ -201,7 +225,7 @@ interface ValidationResult {
 **Validates: Requirements 5.1**
 
 ### Property 15: Recurring reminder advancement
-*For any* recurring reminder (monthly, quarterly, annually), marking it as completed should advance the due date by exactly one period according to its recurrence pattern.
+*For any* recurring reminder (monthly, quarterly, semi-annually, annually, custom), marking it as completed should advance the due date by exactly one period according to its recurrence pattern.
 **Validates: Requirements 5.2**
 
 ### Property 16: Completion history display
@@ -227,6 +251,22 @@ interface ValidationResult {
 ### Property 21: Filter clearing restores full list
 *For any* collection of reminders with active filters, clearing all filters should return the complete set of reminders.
 **Validates: Requirements 7.3**
+
+### Property 22: Custom recurrence calculation correctness
+*For any* reminder with custom recurrence and a specified interval in days, calculating the next occurrence from a given due date should advance the date by exactly the specified number of days.
+**Validates: Requirements 1.3**
+
+### Property 23: Theme toggle switches mode
+*For any* current theme state (light or dark), toggling the theme should switch to the opposite theme.
+**Validates: Requirements 11.2**
+
+### Property 24: Theme preference persistence round-trip
+*For any* theme preference (light or dark), saving it to storage and then retrieving it should return the same theme value.
+**Validates: Requirements 11.3, 11.4**
+
+### Property 25: Theme change updates UI reactively
+*For any* theme change, all visual elements should update to match the selected theme without requiring page refresh.
+**Validates: Requirements 11.5**
 
 ## Error Handling
 
@@ -266,7 +306,7 @@ We will use **fast-check** (for JavaScript/TypeScript) as our property-based tes
 - Tag format: `// Feature: reminder-manager, Property {number}: {property_text}`
 
 **Property Test Coverage:**
-- All 21 correctness properties will have corresponding property-based tests
+- All 25 correctness properties will have corresponding property-based tests
 - Tests will use smart generators that produce valid reminder data within realistic constraints
 - Edge cases (empty lists, boundary dates, maximum values) will be handled by the generators
 
@@ -275,8 +315,9 @@ We will use **fast-check** (for JavaScript/TypeScript) as our property-based tes
 - `arbitraryReminderInput()`: Generates valid input data for reminder creation
 - `arbitraryIncompleteInput()`: Generates input with missing required fields
 - `arbitraryDate()`: Generates dates within reasonable ranges (past 1 year to future 5 years)
-- `arbitraryRecurrence()`: Generates recurrence patterns
+- `arbitraryRecurrence()`: Generates recurrence patterns (including custom with random intervals)
 - `arbitraryCategory()`: Generates reminder categories
+- `arbitraryTheme()`: Generates theme values (light or dark)
 
 ### Unit Testing
 
@@ -339,7 +380,16 @@ Unit tests will complement property-based tests by verifying specific examples a
 - ARIA labels for screen readers
 - Keyboard navigation support
 - Focus management for modals and forms
-- Sufficient color contrast for visual indicators
+- Sufficient color contrast for visual indicators in both light and dark modes
+
+### Theme Implementation
+- CSS custom properties (variables) for colors that change between themes
+- System theme detection using `prefers-color-scheme` media query
+- Theme applied via `data-theme` attribute on document root
+- Theme toggle button with dynamic icon (🌙 for light mode, ☀️ for dark mode)
+- Theme toggle button accessible via keyboard
+- Smooth transitions between theme changes
+- Theme preference stored in local storage with key `reminder-manager-theme`
 
 ### Future Enhancements
 - Cloud sync across devices

@@ -11,10 +11,13 @@ export interface CompletionRecord {
   originalDueDate: Date;
 }
 
+export type Currency = 'USD' | 'EUR' | 'INR';
+
 export interface Reminder {
   id: string;
   name: string;
   amount: number;
+  currency: Currency;
   dueDate: Date;
   category: ReminderCategory;
   recurrence: RecurrencePattern;
@@ -29,6 +32,7 @@ export interface Reminder {
 export interface ReminderInput {
   name: string;
   amount: number;
+  currency: Currency;
   dueDate: string;
   category: ReminderCategory;
   recurrence: RecurrencePattern;

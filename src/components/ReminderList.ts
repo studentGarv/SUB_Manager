@@ -42,7 +42,7 @@ export class ReminderList {
       <div class="reminder-item ${statusClass}" data-reminder-id="${reminder.id}">
         <div class="reminder-header">
           <h3 class="reminder-title">${this.escapeHtml(reminder.name)}</h3>
-          <span class="reminder-amount">$${reminder.amount.toFixed(2)}</span>
+          <span class="reminder-amount">${this.formatCurrency(reminder.amount, reminder.currency)}</span>
         </div>
         
         <div class="reminder-details">
@@ -189,6 +189,16 @@ export class ReminderList {
         ${reminder.completionHistory.length > 5 ? `<div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: var(--spacing-xs);">... and ${reminder.completionHistory.length - 5} more</div>` : ''}
       </div>
     `;
+  }
+
+  private formatCurrency(amount: number, currency: string): string {
+    const symbols: { [key: string]: string } = {
+      'USD': '$',
+      'EUR': '€',
+      'INR': '₹'
+    };
+    const symbol = symbols[currency] || '$';
+    return `${symbol}${amount.toFixed(2)}`;
   }
 
   private escapeHtml(text: string): string {

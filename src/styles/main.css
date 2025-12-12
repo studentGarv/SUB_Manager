@@ -654,12 +654,14 @@ h2 {
   margin-bottom: var(--spacing-md);
   font-weight: 600;
   font-size: 1.5rem;
+  color: var(--text-primary);
 }
 
 .modal-content p {
   margin-bottom: var(--spacing-lg);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   line-height: 1.6;
+  opacity: 0.9;
 }
 
 .modal-actions {
@@ -803,6 +805,8 @@ h2 {
     top: auto;
     z-index: 1002;
     margin: 0;
+    /* padding: var(--spacing-md); */
+    padding-bottom: 100px; /* Space for buttons */
     border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
     transform: translateY(100%);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -810,7 +814,6 @@ h2 {
     max-height: 70vh;
     animation: none;
     pointer-events: none;
-    padding-bottom: 100px; /* Space for buttons */
   }
 
   .notifications-panel.mobile-open {
@@ -821,10 +824,10 @@ h2 {
   .notifications-panel h2 {
     position: sticky;
     top: 0;
-    background: var(--glass-bg);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    padding: var(--spacing-md) 0;
+    /* background: var(--glass-bg); */
+    /* backdrop-filter: blur(40px) saturate(180%); */
+    /* -webkit-backdrop-filter: blur(40px) saturate(180%); */
+    padding: 0;
     margin: 0 0 var(--spacing-md) 0;
     z-index: 10;
   }

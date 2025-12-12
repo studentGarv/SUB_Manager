@@ -13,6 +13,10 @@ The Reminder Manager is a web application that enables users to create, manage, 
 - **Due Date**: The date when a payment or action is required
 - **Notification**: An alert displayed to the User about an upcoming or overdue reminder
 - **Reminder Category**: A classification type for reminders (subscription, tax, insurance, utility, other)
+- **Browser Notification**: A system-level notification displayed by the web browser outside the application window
+- **Notification Preferences**: User-configurable settings that control when and how notifications are delivered
+- **Google Calendar Integration**: A feature that allows users to add reminders to their Google Calendar through generated calendar URLs
+- **Calendar URL**: A specially formatted web link that opens Google Calendar with pre-filled event details
 
 ## Requirements
 
@@ -105,3 +109,27 @@ The Reminder Manager is a web application that enables users to create, manage, 
 2. WHEN a user accesses the application on a desktop device, THEN the Reminder Manager SHALL display a layout that utilizes the available screen space effectively
 3. WHEN a user interacts with touch gestures on mobile, THEN the Reminder Manager SHALL respond appropriately to touch inputs
 4. WHEN the viewport size changes, THEN the Reminder Manager SHALL adapt the layout without losing functionality
+
+### Requirement 9
+
+**User Story:** As a user, I want to configure notification preferences for my reminders, so that I can receive alerts in the way that works best for me.
+
+#### Acceptance Criteria
+
+1. WHEN a user accesses notification settings, THEN the Reminder Manager SHALL display options for browser notifications, email notifications, and notification timing preferences
+2. WHEN a user enables browser notifications, THEN the Reminder Manager SHALL request browser notification permission and display notifications for upcoming and overdue reminders
+3. WHEN a user sets notification timing preferences, THEN the Reminder Manager SHALL send notifications according to the selected schedule (1 day before, 3 days before, 1 week before, or custom)
+4. WHEN a user disables notifications for a specific reminder, THEN the Reminder Manager SHALL exclude that reminder from all notification channels while keeping the reminder active
+5. WHEN browser notifications are not supported or denied, THEN the Reminder Manager SHALL display an informational message and continue with in-app notifications only
+
+### Requirement 10
+
+**User Story:** As a user, I want to add my reminders to Google Calendar, so that I can integrate them with my existing calendar workflow.
+
+#### Acceptance Criteria
+
+1. WHEN a user views a reminder, THEN the Reminder Manager SHALL display an "Add to Google Calendar" button or link
+2. WHEN a user clicks "Add to Google Calendar", THEN the Reminder Manager SHALL generate a Google Calendar URL with the reminder details pre-filled (title, date, description, recurrence)
+3. WHEN the Google Calendar URL is generated, THEN the Reminder Manager SHALL open the URL in a new tab or window to allow the user to save the event to their calendar
+4. WHEN a reminder has recurrence, THEN the Reminder Manager SHALL include the appropriate recurrence pattern in the Google Calendar URL
+5. WHEN a user prefers calendar integration, THEN the Reminder Manager SHALL provide a setting to automatically generate calendar links for all new reminders

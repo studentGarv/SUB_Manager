@@ -59,7 +59,7 @@ export class NotificationPanel {
         <div class="notification-content">
           <div class="notification-title">${this.escapeHtml(reminder.name)}</div>
           <div class="notification-meta">
-            $${reminder.amount.toFixed(2)} • ${statusText}
+            ${this.formatCurrency(reminder.amount, reminder.currency)} • ${statusText}
           </div>
         </div>
         <button class="btn btn-sm btn-secondary dismiss-btn" data-id="${reminder.id}" aria-label="Dismiss notification">
@@ -80,6 +80,16 @@ export class NotificationPanel {
 
   private handleDismiss(reminderId: string): void {
     this.appState.dismissNotification(reminderId);
+  }
+
+  private formatCurrency(amount: number, currency: string): string {
+    const symbols: { [key: string]: string } = {
+      'USD': '$',
+      'EUR': '€',
+      'INR': '₹'
+    };
+    const symbol = symbols[currency] || '$';
+    return `${symbol}${amount.toFixed(2)}`;
   }
 
   private escapeHtml(text: string): string {

@@ -40,7 +40,14 @@
 
           <div class="form-group">
             <label for="reminder-amount">Amount *</label>
-            <input type="number" id="reminder-amount" name="amount" step="0.01" min="0" required aria-required="true">
+            <div style="display: flex; gap: var(--spacing-sm);">
+              <select id="reminder-currency" name="currency" required aria-required="true" style="width: 100px;">
+                <option value="USD">$ USD</option>
+                <option value="EUR">€ EUR</option>
+                <option value="INR">₹ INR</option>
+              </select>
+              <input type="number" id="reminder-amount" name="amount" step="0.01" min="0" required aria-required="true" style="flex: 1;">
+            </div>
             <span class="error-message" id="amount-error"></span>
           </div>
 

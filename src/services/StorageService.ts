@@ -97,6 +97,7 @@ export class StorageService {
   private deserializeReminder(data: any): Reminder {
     return {
       ...data,
+      currency: data.currency || 'USD', // Default to USD for existing reminders
       dueDate: new Date(data.dueDate),
       createdAt: new Date(data.createdAt),
       updatedAt: new Date(data.updatedAt),

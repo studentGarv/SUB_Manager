@@ -33,6 +33,7 @@ export class ReminderService {
       id: this.generateId(),
       name: data.name,
       amount: data.amount,
+      currency: data.currency || 'USD',
       dueDate,
       category: data.category,
       recurrence: data.recurrence,
@@ -57,6 +58,7 @@ export class ReminderService {
     const updatedData: ReminderInput = {
       name: data.name ?? existing.name,
       amount: data.amount ?? existing.amount,
+      currency: data.currency ?? existing.currency,
       dueDate: data.dueDate ?? existing.dueDate.toISOString(),
       category: data.category ?? existing.category,
       recurrence: data.recurrence ?? existing.recurrence,
@@ -80,6 +82,7 @@ export class ReminderService {
       ...existing,
       name: updatedData.name,
       amount: updatedData.amount,
+      currency: updatedData.currency,
       dueDate,
       category: updatedData.category,
       recurrence: updatedData.recurrence,

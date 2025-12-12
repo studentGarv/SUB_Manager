@@ -52,6 +52,7 @@ export class ReminderForm {
     const data: ReminderInput = {
       name: formData.get('name') as string,
       amount: parseFloat(formData.get('amount') as string),
+      currency: formData.get('currency') as any,
       dueDate: formData.get('dueDate') as string,
       category: formData.get('category') as any,
       recurrence: recurrence,
@@ -96,6 +97,7 @@ export class ReminderForm {
 
     (document.getElementById('reminder-name') as HTMLInputElement).value = reminder.name;
     (document.getElementById('reminder-amount') as HTMLInputElement).value = reminder.amount.toString();
+    (document.getElementById('reminder-currency') as HTMLSelectElement).value = reminder.currency || 'USD';
     (document.getElementById('reminder-due-date') as HTMLInputElement).value = 
       reminder.dueDate.toISOString().split('T')[0];
     (document.getElementById('reminder-category') as HTMLSelectElement).value = reminder.category;

@@ -49,6 +49,18 @@ The application is a Single Page Application (SPA) that runs entirely in the bro
 - Outputs: Theme changes applied to DOM
 - Responsibilities: Detect system theme using prefers-color-scheme, toggle theme on button click, persist theme preference to localStorage, apply theme via data-theme attribute, update theme icon
 
+**NotificationSettings Component**
+- Purpose: Configure notification preferences
+- Inputs: User notification preferences (browser notifications enabled, notification timing, per-reminder notification settings)
+- Outputs: Updated notification preferences
+- Responsibilities: Display notification settings UI, handle browser notification permission requests, manage notification timing preferences, allow disabling notifications per reminder
+
+**CalendarIntegration Utility**
+- Purpose: Generate Google Calendar URLs for reminders
+- Inputs: Reminder data (name, due date, amount, recurrence, notes)
+- Outputs: Google Calendar URL with pre-filled event details
+- Responsibilities: Format reminder data into Google Calendar URL parameters, handle recurrence pattern conversion to Google Calendar format, generate shareable calendar links
+
 ### Business Logic Modules
 
 **ReminderService**
@@ -82,6 +94,26 @@ interface ValidationService {
 }
 ```
 
+**NotificationService**
+```typescript
+interface NotificationService {
+  requestPermission(): Promise<NotificationPermission>
+  sendBrowserNotification(reminder: Reminder): void
+  scheduleNotifications(reminder: Reminder, preferences: NotificationPreferences): void
+  cancelNotifications(reminderId: string): void
+  checkNotificationSupport(): boolean
+}
+```
+
+**CalendarIntegration**
+```typescript
+interface CalendarIntegration {
+  generateGoogleCalendarUrl(reminder: Reminder): string
+  openCalendarLink(reminder: Reminder): void
+  formatRecurrenceForGoogleCalendar(recurrence: RecurrencePattern, customDays?: number): string
+}
+```
+
 ### Data Access Layer
 
 **StorageService**
@@ -92,6 +124,8 @@ interface StorageService {
   getAllReminders(): Reminder[]
   updateReminder(id: string, reminder: Reminder): void
   deleteReminder(id: string): void
+  saveNotificationPreferences(preferences: NotificationPreferences): void
+  getNotificationPreferences(): NotificationPreferences | null
   // Theme preference is stored directly via localStorage in ThemeManager
 }
 ```
@@ -123,6 +157,7 @@ interface Reminder {
   notes?: string                // Optional user notes
   status: ReminderStatus        // Current status
   completionHistory: CompletionRecord[]  // Past completions
+  notificationsEnabled: boolean // Whether notifications are enabled for this reminder
   createdAt: Date              // Creation timestamp
   updatedAt: Date              // Last modification timestamp
 }
@@ -160,6 +195,18 @@ interface FilterCriteria {
 interface ValidationResult {
   isValid: boolean
   errors: { field: string; message: string }[]
+}
+
+interface NotificationPreferences {
+  browserNotificationsEnabled: boolean
+  notificationTiming: NotificationTiming[]  // When to send notifications (e.g., 1 day before, 3 days before)
+  autoGenerateCalendarLinks: boolean        // Automatically show calendar links for new reminders
+}
+
+type NotificationTiming = '1-day' | '3-days' | '1-week' | 'custom'
+
+interface CustomNotificationTiming {
+  days: number  // Number of days before due date
 }
 ```
 
@@ -267,6 +314,34 @@ interface ValidationResult {
 ### Property 25: Theme change updates UI reactively
 *For any* theme change, all visual elements should update to match the selected theme without requiring page refresh.
 **Validates: Requirements 11.5**
+
+### Property 26: Browser notification triggering
+*For any* reminder that is upcoming or overdue, when browser notifications are enabled and the reminder has notifications enabled, a browser notification should be sent.
+**Validates: Requirements 9.2**
+
+### Property 27: Notification timing correctness
+*For any* reminder and notification timing preference (1 day, 3 days, 1 week, or custom days before), notifications should be scheduled to trigger at exactly the specified number of days before the due date.
+**Validates: Requirements 9.3**
+
+### Property 28: Per-reminder notification exclusion
+*For any* reminder with notificationsEnabled set to false, no browser notifications should be sent for that reminder, while the reminder remains active in storage and visible in lists.
+**Validates: Requirements 9.4**
+
+### Property 29: Calendar button presence
+*For any* rendered reminder, the output should include an "Add to Google Calendar" button or link element.
+**Validates: Requirements 10.1**
+
+### Property 30: Google Calendar URL completeness
+*For any* reminder, the generated Google Calendar URL should contain all reminder details (name as title, due date, amount and notes in description, recurrence pattern) in valid Google Calendar URL format.
+**Validates: Requirements 10.2, 10.4**
+
+### Property 31: Recurrence format conversion
+*For any* reminder with a recurrence pattern (monthly, quarterly, semi-annually, annually, custom), the Google Calendar URL should include the recurrence in Google Calendar's RRULE format matching the reminder's pattern.
+**Validates: Requirements 10.4**
+
+### Property 32: Auto-calendar link generation
+*For any* new reminder created when autoGenerateCalendarLinks preference is enabled, the reminder should automatically have a calendar link available without requiring user action.
+**Validates: Requirements 10.5**
 
 ## Error Handling
 
@@ -390,6 +465,30 @@ Unit tests will complement property-based tests by verifying specific examples a
 - Theme toggle button accessible via keyboard
 - Smooth transitions between theme changes
 - Theme preference stored in local storage with key `reminder-manager-theme`
+
+### Notification Implementation
+- Use Browser Notifications API for system-level notifications
+- Request permission using `Notification.requestPermission()`
+- Check notification support with feature detection
+- Schedule notifications based on user timing preferences
+- Per-reminder notification toggle in reminder form and list
+- Graceful fallback to in-app notifications when browser notifications unavailable
+- Notification preferences stored in local storage with key `reminder-manager-notification-prefs`
+- Background check for upcoming reminders (using setInterval or service worker in future)
+
+### Google Calendar Integration Implementation
+- Generate Google Calendar URLs using the standard format: `https://calendar.google.com/calendar/render?action=TEMPLATE&text={title}&dates={start}/{end}&details={description}&recur={rrule}`
+- Convert reminder recurrence patterns to Google Calendar RRULE format:
+  - Monthly: `RRULE:FREQ=MONTHLY`
+  - Quarterly: `RRULE:FREQ=MONTHLY;INTERVAL=3`
+  - Semi-annually: `RRULE:FREQ=MONTHLY;INTERVAL=6`
+  - Annually: `RRULE:FREQ=YEARLY`
+  - Custom (every X days): `RRULE:FREQ=DAILY;INTERVAL=X`
+- Format dates in ISO 8601 format (YYYYMMDDTHHMMSSZ)
+- URL-encode all parameters to handle special characters
+- Open calendar links in new tab using `window.open()` with `target="_blank"`
+- Display calendar button/link on each reminder in the list
+- Optional auto-generation setting in notification preferences
 
 ### Future Enhancements
 - Cloud sync across devices

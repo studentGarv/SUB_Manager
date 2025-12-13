@@ -1,6 +1,7 @@
-import type { Reminder } from '../models/types';
+import type { Reminder, NotificationPreferences } from '../models/types';
 
 const STORAGE_KEY = 'reminder-manager-reminders';
+const NOTIFICATION_PREFS_KEY = 'reminder-manager-notification-prefs';
 
 export class StorageService {
   private isStorageAvailable(): boolean {
@@ -98,6 +99,7 @@ export class StorageService {
     return {
       ...data,
       currency: data.currency || 'USD', // Default to USD for existing reminders
+      notificationsEnabled: data.notificationsEnabled !== undefined ? data.notificationsEnabled : true, // Default to enabled
       dueDate: new Date(data.dueDate),
       createdAt: new Date(data.createdAt),
       updatedAt: new Date(data.updatedAt),
@@ -106,5 +108,41 @@ export class StorageService {
         originalDueDate: new Date(record.originalDueDate),
       })),
     };
+  }
+
+  // Notification preferences methods
+  saveNotificationPreferences(preferences: NotificationPreferences): void {
+    if (!this.isStorageAvailable()) {
+      throw new Error('Local storage is not available');
+    }
+
+    try {
+      localStorage.setItem(NOTIFICATION_PREFS_KEY, JSON.stringify(preferences));
+    } catch (e) {
+      throw new Error('Failed to save notification preferences');
+    }
+  }
+
+  getNotificationPreferences(): NotificationPreferences | null {
+    if (!this.isStorageAvailable()) {
+      return null;
+    }
+
+    try {
+      const data = localStorage.getItem(NOTIFICATION_PREFS_KEY);
+      if (!data) {
+        // Return default preferences
+        return {
+          browserNotificationsEnabled: false,
+          notificationTiming: ['1-day'],
+          autoGenerateCalendarLinks: false,
+        };
+      }
+
+      return JSON.parse(data);
+    } catch (e) {
+      console.error('Failed to load notification preferences', e);
+      return null;
+    }
   }
 }

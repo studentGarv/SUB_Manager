@@ -2,6 +2,7 @@ import { differenceInDays, format } from 'date-fns';
 import type { Reminder } from '../models/types';
 import { ReminderService } from '../services/ReminderService';
 import { AppState } from '../services/AppState';
+import { CalendarIntegration } from '../utils/CalendarIntegration';
 
 export class ReminderList {
   private container: HTMLElement;
@@ -9,6 +10,7 @@ export class ReminderList {
   private appState: AppState;
   private onEdit: (reminder: Reminder) => void;
   private onDelete: (id: string) => void;
+  private showCalendarLinks: boolean = true; // Default to true
 
   constructor(
     reminderService: ReminderService,
@@ -21,6 +23,10 @@ export class ReminderList {
     this.onEdit = onEdit;
     this.onDelete = onDelete;
     this.container = document.getElementById('reminders-content') as HTMLElement;
+  }
+
+  setShowCalendarLinks(show: boolean): void {
+    this.showCalendarLinks = show;
   }
 
   render(reminders: Reminder[]): void {
@@ -78,6 +84,11 @@ export class ReminderList {
           <button class="btn btn-sm btn-danger delete-btn" data-id="${reminder.id}" aria-label="Delete ${this.escapeHtml(reminder.name)}">
             Delete
           </button>
+          ${this.showCalendarLinks ? `
+          <button class="btn btn-sm btn-secondary calendar-btn" data-id="${reminder.id}" aria-label="Add ${this.escapeHtml(reminder.name)} to Google Calendar">
+            📅 Add to Calendar
+          </button>
+          ` : ''}
         </div>
       </div>
     `;
@@ -110,6 +121,14 @@ export class ReminderList {
         this.handleMarkComplete(id);
       });
     });
+
+    // Calendar buttons
+    this.container.querySelectorAll('.calendar-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.target as HTMLElement).dataset.id!;
+        this.handleAddToCalendar(id);
+      });
+    });
   }
 
   private handleMarkComplete(id: string): void {
@@ -118,6 +137,17 @@ export class ReminderList {
       this.appState.setReminders(this.reminderService.getAllReminders());
     } catch (error) {
       console.error('Failed to mark reminder as complete', error);
+    }
+  }
+
+  private handleAddToCalendar(id: string): void {
+    try {
+      const reminder = this.reminderService.getAllReminders().find(r => r.id === id);
+      if (reminder) {
+        CalendarIntegration.openCalendarLink(reminder);
+      }
+    } catch (error) {
+      console.error('Failed to add reminder to calendar', error);
     }
   }
 

@@ -339,3 +339,180 @@
     - Test on multiple browsers and devices
     - Test theme switching on different devices
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 11.5_
+
+- [x] 20. Implement notification preferences and browser notifications
+
+
+
+  - [x] 20.1 Update data models for notification preferences
+    - Add NotificationPreferences interface to types
+    - Add notificationsEnabled field to Reminder interface with default true
+    - Add NotificationTiming type and CustomNotificationTiming interface
+
+
+    - _Requirements: 9.1, 9.4_
+  
+  - [x] 20.2 Create NotificationService for browser notifications
+    - Implement checkNotificationSupport to detect browser notification availability
+    - Implement requestPermission to request browser notification permission
+    - Implement sendBrowserNotification to send notifications for reminders
+    - Implement scheduleNotifications based on timing preferences
+
+
+    - Implement cancelNotifications for specific reminders
+    - Handle permission denied and unsupported scenarios gracefully
+    - _Requirements: 9.2, 9.5_
+  
+
+
+  - [x] 20.3 Update StorageService for notification preferences
+    - Implement saveNotificationPreferences function
+    - Implement getNotificationPreferences function
+    - Use storage key 'reminder-manager-notification-prefs'
+    - _Requirements: 9.1_
+  
+  - [x] 20.4 Create NotificationSettings component
+
+
+    - Build settings UI with browser notification toggle
+    - Add notification timing preferences (1 day, 3 days, 1 week, custom)
+    - Add auto-generate calendar links toggle
+    - Handle browser notification permission request on enable
+
+    - Display informational message when notifications not supported/denied
+    - Save preferences to storage on change
+    - _Requirements: 9.1, 9.2, 9.5, 10.5_
+  
+  - [x] 20.5 Update ReminderForm to include per-reminder notification toggle
+    - Add checkbox for enabling/disabling notifications for the reminder
+    - Default to enabled for new reminders
+    - Persist notificationsEnabled field with reminder
+    - _Requirements: 9.4_
+  
+  - [ ] 20.6 Implement notification scheduling logic
+
+
+    - Check for upcoming reminders based on timing preferences
+    - Send browser notifications for reminders within notification window
+    - Respect per-reminder notification settings
+    - Use setInterval for periodic checks (every hour or configurable)
+    - _Requirements: 9.2, 9.3, 9.4_
+  
+  - [ ]* 20.7 Write property test for browser notification triggering
+    - **Property 26: Browser notification triggering**
+    - **Validates: Requirements 9.2**
+  
+  - [ ]* 20.8 Write property test for notification timing
+    - **Property 27: Notification timing correctness**
+    - **Validates: Requirements 9.3**
+  
+  - [ ]* 20.9 Write property test for per-reminder notification exclusion
+    - **Property 28: Per-reminder notification exclusion**
+    - **Validates: Requirements 9.4**
+  
+  - [ ]* 20.10 Write unit tests for notification service
+    - Test permission request flow
+    - Test notification support detection
+    - Test notification scheduling with different timing preferences
+    - Test graceful fallback when notifications unavailable
+    - _Requirements: 9.2, 9.3, 9.5_
+
+- [x] 21. Implement Google Calendar integration
+
+
+
+
+
+  - [x] 21.1 Create CalendarIntegration utility
+
+
+    - Implement generateGoogleCalendarUrl function
+    - Format reminder details into Google Calendar URL parameters
+    - Implement formatRecurrenceForGoogleCalendar to convert recurrence patterns to RRULE format
+    - Handle date formatting in ISO 8601 format
+    - URL-encode all parameters properly
+    - _Requirements: 10.2, 10.4_
+  
+  - [x] 21.2 Implement openCalendarLink function
+
+    - Open generated URL in new tab using window.open with target="_blank"
+    - Handle popup blockers gracefully
+    - _Requirements: 10.3_
+  
+  - [x] 21.3 Update ReminderList to display calendar buttons
+
+
+    - Add "Add to Google Calendar" button for each reminder
+    - Wire up button click to CalendarIntegration.openCalendarLink
+    - Style button appropriately
+    - Add icon (📅) for visual clarity
+    - _Requirements: 10.1_
+  
+  - [x] 21.4 Implement auto-calendar link generation
+
+
+    - Check autoGenerateCalendarLinks preference when creating reminders
+    - Automatically display calendar link when preference enabled
+    - _Requirements: 10.5_
+  
+  - [ ]* 21.5 Write property test for calendar button presence
+    - **Property 29: Calendar button presence**
+    - **Validates: Requirements 10.1**
+  
+  - [ ]* 21.6 Write property test for Google Calendar URL completeness
+    - **Property 30: Google Calendar URL completeness**
+    - **Validates: Requirements 10.2, 10.4**
+  
+  - [ ]* 21.7 Write property test for recurrence format conversion
+    - **Property 31: Recurrence format conversion**
+    - **Validates: Requirements 10.4**
+  
+  - [ ]* 21.8 Write property test for auto-calendar link generation
+    - **Property 32: Auto-calendar link generation**
+    - **Validates: Requirements 10.5**
+  
+  - [ ]* 21.9 Write unit tests for calendar integration
+    - Test URL generation with specific reminder data
+    - Test RRULE format for each recurrence pattern
+    - Test URL encoding of special characters
+    - Test date formatting
+    - _Requirements: 10.2, 10.4_
+
+- [x] 22. Integrate notification and calendar features into main app
+
+
+
+
+
+  - [x] 22.1 Update AppState to include notification preferences
+
+
+    - Add notificationPreferences to state
+    - Load preferences from storage on initialization
+    - _Requirements: 9.1_
+  
+  - [x] 22.2 Wire up NotificationService in main application
+
+
+    - Initialize NotificationService
+    - Start notification scheduling on app load
+    - Request permission when user enables browser notifications
+    - _Requirements: 9.2, 9.3_
+  
+  - [x] 22.3 Add settings panel/modal to UI
+
+
+    - Create settings button in header
+    - Display NotificationSettings component in modal
+    - Handle modal open/close
+    - _Requirements: 9.1_
+  
+  - [x] 22.4 Update reminder creation flow
+
+
+    - Include notificationsEnabled field in new reminders
+    - Show calendar link based on auto-generate preference
+    - _Requirements: 9.4, 10.5_
+
+- [ ] 23. Final checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.

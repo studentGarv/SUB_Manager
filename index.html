@@ -15,9 +15,14 @@
           <h1>Reminder Manager</h1>
           <p class="subtitle">Track your subscriptions and financial obligations</p>
         </div>
-        <button id="theme-toggle" class="btn btn-secondary" aria-label="Toggle dark mode">
-          <span id="theme-icon">🌙</span>
-        </button>
+        <div style="display: flex; gap: var(--spacing-sm); align-items: center;">
+          <button id="settings-btn" class="btn btn-secondary" aria-label="Open settings">
+            ⚙️ Settings
+          </button>
+          <button id="theme-toggle" class="btn btn-secondary" aria-label="Toggle dark mode">
+            <span id="theme-icon">🌙</span>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -93,6 +98,13 @@
             <textarea id="reminder-notes" name="notes" rows="3"></textarea>
           </div>
 
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="reminder-notifications-enabled" name="notificationsEnabled" checked>
+              <span>Enable notifications for this reminder</span>
+            </label>
+          </div>
+
           <div class="form-actions">
             <button type="submit" class="btn btn-primary">Save Reminder</button>
             <button type="button" id="cancel-btn" class="btn btn-secondary">Cancel</button>
@@ -139,6 +151,20 @@
         <div class="modal-actions">
           <button type="button" id="confirm-delete-btn" class="btn btn-danger">Delete</button>
           <button type="button" id="cancel-delete-btn" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal" role="dialog" aria-labelledby="settings-modal-title" aria-modal="true">
+      <div class="modal-content modal-large">
+        <div class="modal-header">
+          <h3 id="settings-modal-title">Settings</h3>
+          <button type="button" id="close-settings-btn" class="btn-close" aria-label="Close settings">✕</button>
+        </div>
+        <div id="notification-settings-content"></div>
+        <div class="modal-actions">
+          <button type="button" id="save-settings-btn" class="btn btn-primary">Close</button>
         </div>
       </div>
     </div>

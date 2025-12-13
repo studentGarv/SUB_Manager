@@ -41,6 +41,7 @@ export class ReminderService {
       notes: data.notes,
       status: this.calculateStatus(dueDate),
       completionHistory: [],
+      notificationsEnabled: data.notificationsEnabled !== false, // Default to true
       createdAt: now,
       updatedAt: now,
     };
@@ -64,6 +65,7 @@ export class ReminderService {
       recurrence: data.recurrence ?? existing.recurrence,
       customRecurrenceDays: data.customRecurrenceDays ?? existing.customRecurrenceDays,
       notes: data.notes ?? existing.notes,
+      notificationsEnabled: data.notificationsEnabled ?? existing.notificationsEnabled,
     };
 
     const validation = this.validationService.validateReminderInput(updatedData);
@@ -88,6 +90,7 @@ export class ReminderService {
       recurrence: updatedData.recurrence,
       customRecurrenceDays: updatedData.customRecurrenceDays,
       notes: updatedData.notes,
+      notificationsEnabled: updatedData.notificationsEnabled !== false,
       status: this.calculateStatus(dueDate),
       updatedAt: new Date(),
     };

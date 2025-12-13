@@ -1,4 +1,4 @@
-import type { Reminder, FilterCriteria } from '../models/types';
+import type { Reminder, FilterCriteria, NotificationPreferences } from '../models/types';
 
 type StateSubscriber = () => void;
 
@@ -7,6 +7,7 @@ export interface AppStateData {
   filters: FilterCriteria;
   editingReminderId: string | null;
   dismissedNotifications: Set<string>;
+  notificationPreferences: NotificationPreferences | null;
 }
 
 export class AppState {
@@ -19,11 +20,16 @@ export class AppState {
       filters: {},
       editingReminderId: null,
       dismissedNotifications: new Set(),
+      notificationPreferences: null,
     };
   }
 
   getState(): Readonly<AppStateData> {
-    return { ...this.state, dismissedNotifications: new Set(this.state.dismissedNotifications) };
+    return { 
+      ...this.state, 
+      dismissedNotifications: new Set(this.state.dismissedNotifications),
+      notificationPreferences: this.state.notificationPreferences ? { ...this.state.notificationPreferences } : null
+    };
   }
 
   setReminders(reminders: Reminder[]): void {
@@ -38,6 +44,11 @@ export class AppState {
 
   setEditingReminder(id: string | null): void {
     this.state.editingReminderId = id;
+    this.notifySubscribers();
+  }
+
+  setNotificationPreferences(preferences: NotificationPreferences): void {
+    this.state.notificationPreferences = preferences;
     this.notifySubscribers();
   }
 

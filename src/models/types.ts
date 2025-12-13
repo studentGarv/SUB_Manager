@@ -25,6 +25,7 @@ export interface Reminder {
   notes?: string;
   status: ReminderStatus;
   completionHistory: CompletionRecord[];
+  notificationsEnabled: boolean; // Whether notifications are enabled for this reminder
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +39,7 @@ export interface ReminderInput {
   recurrence: RecurrencePattern;
   customRecurrenceDays?: number;
   notes?: string;
+  notificationsEnabled?: boolean;
 }
 
 export interface FilterCriteria {
@@ -66,3 +68,22 @@ export function isReminderStatus(value: string): value is ReminderStatus {
 
 // Utility type for partial updates
 export type ReminderUpdate = Partial<Omit<ReminderInput, 'id'>>;
+
+// Notification types
+export type NotificationTiming = '1-day' | '3-days' | '1-week' | 'custom';
+
+export interface CustomNotificationTiming {
+  days: number; // Number of days before due date
+}
+
+export interface NotificationPreferences {
+  browserNotificationsEnabled: boolean;
+  notificationTiming: NotificationTiming[];
+  customTimingDays?: number; // For custom timing
+  autoGenerateCalendarLinks: boolean;
+}
+
+// Type guard for notification timing
+export function isNotificationTiming(value: string): value is NotificationTiming {
+  return ['1-day', '3-days', '1-week', 'custom'].includes(value);
+}

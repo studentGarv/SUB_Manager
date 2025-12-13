@@ -1,24 +1,34 @@
 import { ReminderService } from './services/ReminderService';
 import { AppState } from './services/AppState';
+import { StorageService } from './services/StorageService';
+import { NotificationService } from './services/NotificationService';
 import { ReminderForm } from './components/ReminderForm';
 import { ReminderList } from './components/ReminderList';
 import { NotificationPanel } from './components/NotificationPanel';
+import { NotificationSettings } from './components/NotificationSettings';
 import { FilterBar } from './components/FilterBar';
 import { ErrorHandler } from './utils/errorHandler';
 import { ThemeManager } from './utils/ThemeManager';
-import type { Reminder } from './models/types';
+import type { Reminder, NotificationPreferences } from './models/types';
 
 class App {
   private reminderService: ReminderService;
+  private storageService: StorageService;
+  private notificationService: NotificationService;
   private appState: AppState;
   private reminderForm: ReminderForm;
   private reminderList: ReminderList;
   private notificationPanel: NotificationPanel;
+  private notificationSettings: NotificationSettings | null = null;
   private deleteModal: HTMLElement;
+  private settingsModal: HTMLElement;
   private pendingDeleteId: string | null = null;
+  private notificationCheckInterval: number | null = null;
 
   constructor() {
     this.reminderService = new ReminderService();
+    this.storageService = new StorageService();
+    this.notificationService = new NotificationService();
     this.appState = new AppState();
 
     // Initialize theme
@@ -36,11 +46,14 @@ class App {
     new FilterBar(this.appState);
 
     this.deleteModal = document.getElementById('delete-modal') as HTMLElement;
+    this.settingsModal = document.getElementById('settings-modal') as HTMLElement;
 
     this.setupDeleteModal();
+    this.setupSettingsModal();
     this.setupMobileNotifications();
     this.setupStateSubscription();
     this.loadInitialData();
+    this.startNotificationScheduler();
   }
 
   private setupDeleteModal(): void {
@@ -56,6 +69,86 @@ class App {
         this.cancelDelete();
       }
     });
+  }
+
+  private setupSettingsModal(): void {
+    const settingsBtn = document.getElementById('settings-btn');
+    const closeBtn = document.getElementById('close-settings-btn');
+    const saveBtn = document.getElementById('save-settings-btn');
+
+    settingsBtn?.addEventListener('click', () => this.openSettings());
+    closeBtn?.addEventListener('click', () => this.closeSettings());
+    saveBtn?.addEventListener('click', () => this.closeSettings());
+
+    // Close modal on background click
+    this.settingsModal.addEventListener('click', (e) => {
+      if (e.target === this.settingsModal) {
+        this.closeSettings();
+      }
+    });
+  }
+
+  private openSettings(): void {
+    if (!this.notificationSettings) {
+      this.notificationSettings = new NotificationSettings(
+        this.storageService,
+        this.notificationService,
+        (prefs) => this.handlePreferencesChange(prefs)
+      );
+    }
+    this.settingsModal.classList.add('active');
+  }
+
+  private closeSettings(): void {
+    this.settingsModal.classList.remove('active');
+  }
+
+  private handlePreferencesChange(preferences: NotificationPreferences): void {
+    // Update app state with new preferences
+    this.appState.setNotificationPreferences(preferences);
+    
+    // Restart notification scheduler with new preferences
+    this.startNotificationScheduler();
+    
+    // Update calendar link visibility
+    this.reminderList.setShowCalendarLinks(preferences.autoGenerateCalendarLinks);
+    this.render();
+  }
+
+  private startNotificationScheduler(): void {
+    // Clear existing interval
+    if (this.notificationCheckInterval) {
+      clearInterval(this.notificationCheckInterval);
+    }
+
+    const preferences = this.storageService.getNotificationPreferences();
+    if (!preferences || !preferences.browserNotificationsEnabled) {
+      return;
+    }
+
+    // Check if we have permission
+    if (this.notificationService.checkNotificationSupport() && Notification.permission !== 'granted') {
+      console.warn('Notification permission not granted. Notifications will not be sent.');
+      return;
+    }
+
+    // Check notifications immediately
+    this.checkNotifications();
+
+    // Check every hour
+    this.notificationCheckInterval = window.setInterval(() => {
+      this.checkNotifications();
+    }, 60 * 60 * 1000); // 1 hour
+  }
+
+  private checkNotifications(): void {
+    const preferences = this.storageService.getNotificationPreferences();
+    if (!preferences) {
+      return;
+    }
+
+    const reminders = this.reminderService.getAllReminders();
+    this.notificationService.checkAndNotify(reminders, preferences);
   }
 
   private setupMobileNotifications(): void {
@@ -102,6 +195,21 @@ class App {
   private loadInitialData(): void {
     const reminders = this.reminderService.getAllReminders();
     this.appState.setReminders(reminders);
+    
+    // Load notification preferences from storage
+    const preferences = this.storageService.getNotificationPreferences();
+    if (preferences) {
+      this.appState.setNotificationPreferences(preferences);
+      this.reminderList.setShowCalendarLinks(preferences.autoGenerateCalendarLinks);
+    } else {
+      // Set default preferences
+      const defaultPreferences: NotificationPreferences = {
+        browserNotificationsEnabled: false,
+        notificationTiming: ['1-day'],
+        autoGenerateCalendarLinks: false,
+      };
+      this.appState.setNotificationPreferences(defaultPreferences);
+    }
   }
 
   private render(): void {

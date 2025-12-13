@@ -57,6 +57,7 @@ export class ReminderForm {
       category: formData.get('category') as any,
       recurrence: recurrence,
       notes: formData.get('notes') as string || undefined,
+      notificationsEnabled: formData.get('notificationsEnabled') === 'on',
     };
 
     // Add custom recurrence days if applicable
@@ -103,6 +104,7 @@ export class ReminderForm {
     (document.getElementById('reminder-category') as HTMLSelectElement).value = reminder.category;
     (document.getElementById('reminder-recurrence') as HTMLSelectElement).value = reminder.recurrence;
     (document.getElementById('reminder-notes') as HTMLTextAreaElement).value = reminder.notes || '';
+    (document.getElementById('reminder-notifications-enabled') as HTMLInputElement).checked = reminder.notificationsEnabled !== false;
 
     // Handle custom recurrence
     if (reminder.recurrence === 'custom' && reminder.customRecurrenceDays) {

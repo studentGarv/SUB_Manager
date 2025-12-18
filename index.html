@@ -17,7 +17,8 @@
         </div>
         <div style="display: flex; gap: var(--spacing-sm); align-items: center;">
           <button id="settings-btn" class="btn btn-secondary" aria-label="Open settings">
-            ⚙️ Settings
+            <span id="settings-icon">⚙️</span>
+            <span class="settings-text">Settings</span>
           </button>
           <button id="theme-toggle" class="btn btn-secondary" aria-label="Toggle dark mode">
             <span id="theme-icon">🌙</span>
@@ -163,9 +164,6 @@
           <button type="button" id="close-settings-btn" class="btn-close" aria-label="Close settings">✕</button>
         </div>
         <div id="notification-settings-content"></div>
-        <div class="modal-actions">
-          <button type="button" id="save-settings-btn" class="btn btn-primary">Close</button>
-        </div>
       </div>
     </div>
 

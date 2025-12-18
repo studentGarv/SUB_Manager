@@ -74,11 +74,9 @@ class App {
   private setupSettingsModal(): void {
     const settingsBtn = document.getElementById('settings-btn');
     const closeBtn = document.getElementById('close-settings-btn');
-    const saveBtn = document.getElementById('save-settings-btn');
 
     settingsBtn?.addEventListener('click', () => this.openSettings());
     closeBtn?.addEventListener('click', () => this.closeSettings());
-    saveBtn?.addEventListener('click', () => this.closeSettings());
 
     // Close modal on background click
     this.settingsModal.addEventListener('click', (e) => {
@@ -97,10 +95,24 @@ class App {
       );
     }
     this.settingsModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Hide mobile notification button when settings is open
+    const mobileNotificationBtn = document.getElementById('mobile-notification-toggle');
+    if (mobileNotificationBtn) {
+      mobileNotificationBtn.style.display = 'none';
+    }
   }
 
   private closeSettings(): void {
     this.settingsModal.classList.remove('active');
+    document.body.style.overflow = '';
+    
+    // Show mobile notification button when settings is closed
+    const mobileNotificationBtn = document.getElementById('mobile-notification-toggle');
+    if (mobileNotificationBtn && window.innerWidth <= 768) {
+      mobileNotificationBtn.style.display = 'flex';
+    }
   }
 
   private handlePreferencesChange(preferences: NotificationPreferences): void {
@@ -261,6 +273,7 @@ class App {
   private showDeleteConfirmation(id: string): void {
     this.pendingDeleteId = id;
     this.deleteModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
   }
 
   private confirmDelete(): void {
@@ -270,6 +283,7 @@ class App {
         this.appState.setReminders(this.reminderService.getAllReminders());
         this.pendingDeleteId = null;
         this.deleteModal.classList.remove('active');
+        document.body.style.overflow = '';
       } catch (error) {
         ErrorHandler.logError('Delete Reminder', error);
       }
@@ -279,6 +293,7 @@ class App {
   private cancelDelete(): void {
     this.pendingDeleteId = null;
     this.deleteModal.classList.remove('active');
+    document.body.style.overflow = '';
   }
 
   private scrollToForm(): void {
